@@ -72,7 +72,22 @@ python manage.py createsuperuser
 
 Follow the prompts to create an admin account.
 
-### 7. Collect static files (production only)
+### 7. (Optional) Populate demo data
+
+To quickly test the application with sample data:
+
+```bash
+python manage.py populate_demo_data
+```
+
+This creates:
+- 1 Admin account: `admin` / `admin123`
+- 3 Teacher accounts: `teacher1`, `teacher2`, `teacher3` / `teacher123`
+- 8 Student accounts: `student1` through `student8` / `student123`
+- 5 Sample classrooms with multiple announcements and assignments
+- Student submissions distributed across assignments
+
+### 8. Collect static files (production only)
 
 For production deployment:
 
@@ -80,7 +95,7 @@ For production deployment:
 python manage.py collectstatic --noinput --settings=core.settings_prod
 ```
 
-### 8. Run the development server
+### 9. Run the development server
 
 ```bash
 python manage.py runserver 0.0.0.0:8000
