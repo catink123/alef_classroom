@@ -1,0 +1,200 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Create Assignment - {{ classroom.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Create New Assignment</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'classroom:detail' pk=classroom.pk %}">{{ classroom.name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'assignment:list' classroom_slug=classroom.slug %}">Assignments</a></li>
+                    <li class="breadcrumb-item active">Create Assignment</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Assignment Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                            <div class="form-text">A brief summary of the assignment.</div>
+                        </div>
+                        
+                        <!-- Detailed Instructions -->
+                        <div class="mb-3">
+                            <label for="instructions" class="form-label">Detailed Instructions</label>
+                            <textarea class="form-control" id="instructions" name="instructions" rows="5"></textarea>
+                            <div class="form-text">Provide detailed instructions for students to complete the assignment.</div>
+                        </div>
+                        
+                        <!-- Points -->
+                        <div class="mb-3">
+                            <label for="points_possible" class="form-label">Points Possible <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="points_possible" name="points_possible" value="100" min="0" required>
+                        </div>
+                        
+                        <!-- Due Date -->
+                        <div class="mb-3">
+                            <label for="due_date" class="form-label">Due Date <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="due_date" name="due_date" required>
+                        </div>
+                        
+                        <!-- Attachment -->
+                        <div class="mb-3">
+                            <label for="attachment" class="form-label">Attachment</label>
+                            <input class="form-control" type="file" id="attachment" name="attachment">
+                            <div class="form-text">Upload any supporting files or resources (optional).</div>
+                        </div>
+                        
+                        <!-- Late Submissions -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="allow_late" name="allow_late" checked>
+                                <label class="form-check-label" for="allow_late">
+                                    Allow Late Submissions
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Late Penalty -->
+                        <div class="mb-3" id="late_penalty_container">
+                            <label for="late_penalty" class="form-label">Late Penalty Percentage</label>
+                            <input type="number" class="form-control" id="late_penalty" name="late_penalty" value="0" min="0" max="100">
+                            <div class="form-text">Percentage points to deduct for late submissions (0-100).</div>
+                        </div>
+                        
+                        <!-- Publication Settings -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Publication Settings</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="" id="is_published" name="is_published" checked>
+                                    <label class="form-check-label" for="is_published">
+                                        Published (visible to students)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="is_draft" name="is_draft">
+                                    <label class="form-check-label" for="is_draft">
+                                        Save as Draft
+                                    </label>
+                                    <div class="form-text">Drafts are only visible to teachers and cannot be submitted to.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'assignment:list' classroom_slug=classroom.slug %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Create Assignment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Tips for Creating Assignments</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Be Clear:</strong> Provide detailed instructions to avoid confusion.
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Set Appropriate Points:</strong> Align points with the assignment complexity.
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Include Resources:</strong> Attach any necessary files or links.
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Consider Deadlines:</strong> Set realistic due dates for students.
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Draft Mode:</strong> Use draft mode to prepare assignments in advance.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize datetime picker
+        flatpickr("#due_date", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            minDate: "today",
+            time_24hr: true
+        });
+        
+        // Toggle late penalty based on allow late checkbox
+        const allowLateCheckbox = document.getElementById('allow_late');
+        const latePenaltyContainer = document.getElementById('late_penalty_container');
+        
+        function updateLatePenaltyVisibility() {
+            latePenaltyContainer.style.display = allowLateCheckbox.checked ? 'block' : 'none';
+        }
+        
+        allowLateCheckbox.addEventListener('change', updateLatePenaltyVisibility);
+        updateLatePenaltyVisibility();
+        
+        // Prevent published and draft being selected together
+        const isPublishedCheckbox = document.getElementById('is_published');
+        const isDraftCheckbox = document.getElementById('is_draft');
+        
+        isPublishedCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                isDraftCheckbox.checked = false;
+            }
+        });
+        
+        isDraftCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                isPublishedCheckbox.checked = false;
+            }
+        });
+    });
+</script>
+{% endblock %}

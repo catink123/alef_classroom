@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Alef Classroom{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Material Design Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.0" defer></script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <i class="fas fa-graduation-cap me-2"></i> Alef Classroom
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center {% if request.path == '/dashboard/' %}active{% endif %}" href="/dashboard/">
+                                    <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center {% if '/classroom/' in request.path %}active{% endif %}" href="{% url 'classroom:list' %}">
+                                    <i class="fas fa-chalkboard me-1"></i> Classrooms
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                            {% if user.is_admin %}
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center {% if '/admin-panel/' in request.path %}active{% endif %}" href="{% url 'admin_dashboard' %}">
+                                    <i class="fas fa-shield-alt me-1"></i> Admin Panel
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {% if user.profile_pic %}
+                                    <img src="{{ user.profile_pic.url }}" alt="{{ user.username }}" class="navbar-profile-pic me-2">
+                                    {% else %}
+                                    <i class="fas fa-user-circle me-1"></i>
+                                    {% endif %}
+                                    {{ user.username }}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item d-flex align-items-center" href="{% url 'accounts:profile' %}">
+                                        <i class="fas fa-id-card me-1"></i> My Profile
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item d-flex align-items-center" href="{% url 'accounts:logout' %}">
+                                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                                    </a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center {% if request.path == '/accounts/login/' %}active{% endif %}" href="{% url 'accounts:login' %}">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Login
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center {% if request.path == '/accounts/register/' %}active{% endif %}" href="{% url 'accounts:register' %}">
+                                    <i class="fas fa-user-plus me-1"></i> Register
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <main>
+        <div class="container mt-4">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-graduation-cap me-2"></i> Alef Classroom</h5>
+                    <p class="text-muted">A modern educational platform for teachers and students.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-white">Home</a></li>
+                        <li><a href="/dashboard/" class="text-white">Dashboard</a></li>
+                        <li><a href="/classroom/list/" class="text-white">Classrooms</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="mailto:support@alefclassroom.com" class="text-white">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-3">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 Alef Classroom. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

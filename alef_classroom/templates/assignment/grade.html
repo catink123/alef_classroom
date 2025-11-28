@@ -1,0 +1,254 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Grade Submission - {{ assignment.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .grade-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .grade-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .grade-header h1 {
+        color: #6b8e23;
+        margin-bottom: 0.5rem;
+    }
+    
+    .grade-header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    .submission-info {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    
+    .submission-info h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+    }
+    
+    .submission-info p {
+        margin: 0.5rem 0;
+        color: #666;
+    }
+    
+    .submission-content {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    
+    .submission-content h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+    }
+    
+    .submission-content p {
+        margin: 0;
+        color: #666;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+    
+    .attachments {
+        margin-bottom: 2rem;
+    }
+    
+    .attachments h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+    }
+    
+    .attachment-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .attachment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .attachment-item a {
+        color: #6b8e23;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .attachment-item a:hover {
+        text-decoration: underline;
+    }
+    
+    .attachment-size {
+        color: #666;
+        font-size: 0.875rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #6b8e23;
+        box-shadow: 0 0 0 2px rgba(107, 142, 35, 0.2);
+    }
+    
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .btn-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+    
+    .errorlist li {
+        color: #d32f2f;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .help-text {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="grade-container">
+    <div class="grade-header">
+        <h1>Grade Submission</h1>
+        <p>Grade submission for "{{ assignment.title }}" by {{ submission.student.get_full_name|default:submission.student.username }}</p>
+    </div>
+    
+    <div class="submission-info">
+        <h3>Student Information</h3>
+        <p><strong>Name:</strong> {{ submission.student.get_full_name|default:submission.student.username }}</p>
+        <p><strong>Username:</strong> {{ submission.student.username }}</p>
+        <p><strong>Submitted:</strong> {{ submission.submitted_at|date:"F j, Y g:i A" }}</p>
+        <p><strong>Assignment Points:</strong> {{ assignment.points }}</p>
+    </div>
+    
+    {% if submission.content %}
+        <div class="submission-content">
+            <h3>Submission Content</h3>
+            <p>{{ submission.content }}</p>
+        </div>
+    {% endif %}
+    
+    {% if submission.attachments.all %}
+        <div class="attachments">
+            <h3>Attachments</h3>
+            <ul class="attachment-list">
+                {% for attachment in submission.attachments.all %}
+                    <li class="attachment-item">
+                        <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.file.name|slice:"7:" }}</a>
+                        <span class="attachment-size">{{ attachment.file.size|filesizeformat }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="id_points">Points Earned</label>
+                <input type="number" id="id_points" name="points" min="0" max="{{ assignment.points_possible }}" step="0.01" required>
+                <div class="help-text">Out of {{ assignment.points_possible }} points</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.feedback.id_for_label }}">Feedback</label>
+            {{ form.feedback }}
+            {% if form.feedback.errors %}
+                <ul class="errorlist">
+                    {% for error in form.feedback.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% if form.feedback.help_text %}
+                <div class="help-text">{{ form.feedback.help_text }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="btn-container">
+            <a href="{% url 'assignment:submission_detail' submission.pk %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Grade</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

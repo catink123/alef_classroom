@@ -1,0 +1,17 @@
+{% load i18n %}
+<div class="clearable-file-input-wrapper">
+    {% if widget.is_initial %}
+        <p class="file-info">
+            <a href="{{ widget.value.url }}">{{ widget.value.name }}</a>
+        </p>
+    {% endif %}
+    <input type="file" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
+    {% if widget.is_initial %}
+        <div class="clear-checkbox-wrapper">
+            <label for="{{ widget.checkbox_id }}">
+                <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}" />
+                {% trans "Clear" %}
+            </label>
+        </div>
+    {% endif %}
+</div>

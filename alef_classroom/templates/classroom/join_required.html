@@ -1,0 +1,182 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Join Required - {{ classroom.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .join-required-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .classroom-info {
+        background-color: #f8f9fa;
+        padding: 2rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    
+    .classroom-info h1 {
+        color: #6b8e23;
+        margin-bottom: 1rem;
+    }
+    
+    .classroom-info p {
+        color: #666;
+        margin: 0.5rem 0;
+    }
+    
+    .classroom-banner {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, #6b8e23, #9acd32);
+        border-radius: 4px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    
+    .join-message {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+        padding: 1.5rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    
+    .join-message h3 {
+        margin: 0 0 1rem 0;
+        color: #856404;
+    }
+    
+    .join-message p {
+        margin: 0;
+        line-height: 1.6;
+    }
+    
+    .join-form {
+        background-color: #f8f9fa;
+        padding: 2rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    
+    .join-form h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #6b8e23;
+        box-shadow: 0 0 0 2px rgba(107, 142, 35, 0.2);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+    
+    .errorlist li {
+        color: #d32f2f;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .help-text {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="join-required-container">
+    <div class="classroom-info">
+        <div class="classroom-banner">
+            {{ classroom.name|first|upper }}
+        </div>
+        <h1>{{ classroom.name }}</h1>
+        <p><strong>Course Code:</strong> {{ classroom.course_code }}</p>
+        <p><strong>Teacher:</strong> {{ classroom.creator.get_full_name|default:classroom.creator.username }}</p>
+        {% if classroom.description %}
+            <p><strong>Description:</strong> {{ classroom.description }}</p>
+        {% endif %}
+    </div>
+    
+    <div class="join-message">
+        <h3>Join Required</h3>
+        <p>You need to join this classroom to access its content. Please enter the course code to join, or contact the teacher for an invitation.</p>
+    </div>
+    
+    <div class="join-form">
+        <h3>Join Classroom</h3>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.course_code.id_for_label }}">Course Code</label>
+                {{ form.course_code }}
+                {% if form.course_code.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.course_code.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if form.course_code.help_text %}
+                    <div class="help-text">{{ form.course_code.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Join Classroom</button>
+        </form>
+    </div>
+    
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'classroom:list' %}" class="btn btn-secondary">Back to Classrooms</a>
+    </div>
+</div>
+{% endblock %}

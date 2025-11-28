@@ -1,0 +1,237 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Edit Classroom - {{ classroom.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .classroom-edit-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .classroom-edit-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .classroom-edit-header h1 {
+        color: #6b8e23;
+        margin-bottom: 0.5rem;
+    }
+    
+    .classroom-edit-header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #6b8e23;
+        box-shadow: 0 0 0 2px rgba(107, 142, 35, 0.2);
+    }
+    
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+    }
+    
+    .btn-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+    
+    .errorlist li {
+        color: #d32f2f;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .help-text {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+    
+    .current-banner {
+        margin-bottom: 1rem;
+    }
+    
+    .current-banner img {
+        max-width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="classroom-edit-container">
+    <div class="classroom-edit-header">
+        <h1>Edit Classroom</h1>
+        <p>Update the classroom details for "{{ classroom.name }}"</p>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.name.id_for_label }}">Classroom Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+                <ul class="errorlist">
+                    {% for error in form.name.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <ul class="errorlist">
+                    {% for error in form.description.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.course_code.id_for_label }}">Course Code</label>
+                {{ form.course_code }}
+                {% if form.course_code.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.course_code.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if form.course_code.help_text %}
+                    <div class="help-text">{{ form.course_code.help_text }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.subject.id_for_label }}">Subject</label>
+                {{ form.subject }}
+                {% if form.subject.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.subject.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.banner_image.id_for_label }}">Banner Image</label>
+            {% if classroom.banner_image %}
+                <div class="current-banner">
+                    <img src="{{ classroom.banner_image.url }}" alt="Current banner">
+                </div>
+            {% endif %}
+            {{ form.banner_image }}
+            {% if form.banner_image.errors %}
+                <ul class="errorlist">
+                    {% for error in form.banner_image.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% if form.banner_image.help_text %}
+                <div class="help-text">{{ form.banner_image.help_text }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <div class="checkbox-group">
+                {{ form.is_active }}
+                <label for="{{ form.is_active.id_for_label }}">Active (visible to students)</label>
+            </div>
+            {% if form.is_active.errors %}
+                <ul class="errorlist">
+                    {% for error in form.is_active.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        <div class="btn-container">
+            <a href="{% url 'classroom:detail' classroom.pk %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update Classroom</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

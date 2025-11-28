@@ -1,0 +1,475 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Profile - Alef Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {% if user.profile_pic %}
+                <img src="{{ user.profile_pic.url }}" alt="{{ user.username }}" class="profile-image">
+                {% else %}
+                <div class="default-avatar">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="profile-info">
+                <h2>{{ user.get_full_name }}</h2>
+                <span class="badge badge-{{ profile_type }}">{{ user.get_role_display }}</span>
+                <p class="username">@{{ user.username }}</p>
+                {% if user.bio %}
+                <p class="bio">{{ user.bio }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="profile-tabs">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab" aria-controls="personal" aria-selected="true">Personal Information</button>
+                </li>
+                {% if profile_form %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="role-tab" data-bs-toggle="tab" data-bs-target="#role" type="button" role="tab" aria-controls="role" aria-selected="false">{{ profile_type|title }} Details</button>
+                </li>
+                {% endif %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab" aria-controls="security" aria-selected="false">Security</button>
+                </li>
+            </ul>
+            
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
+                    <form method="post" enctype="multipart/form-data" class="profile-form" id="personal-form">
+                        {% csrf_token %}
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="{{ user_form.first_name.id_for_label }}">First Name:</label>
+                                {{ user_form.first_name }}
+                                {% if user_form.first_name.errors %}
+                                <div class="error-message">{{ user_form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group col-md-6">
+                                <label for="{{ user_form.last_name.id_for_label }}">Last Name:</label>
+                                {{ user_form.last_name }}
+                                {% if user_form.last_name.errors %}
+                                <div class="error-message">{{ user_form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="form-group">
+                            <label for="{{ user_form.username.id_for_label }}">Username:</label>
+                            {{ user_form.username }}
+                            {% if user_form.username.errors %}
+                            <div class="error-message">{{ user_form.username.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ user_form.bio.id_for_label }}">Bio:</label>
+                            {{ user_form.bio }}
+                            {% if user_form.bio.errors %}
+                            <div class="error-message">{{ user_form.bio.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ user_form.profile_pic.id_for_label }}">Profile Picture:</label>
+                            <div class="profile-pic-control">
+                            {{ user_form.profile_pic }}
+                            </div>
+                            {% if user_form.profile_pic.errors %}
+                            <div class="error-message">{{ user_form.profile_pic.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ user_form.phone_number.id_for_label }}">Phone Number:</label>
+                            {{ user_form.phone_number }}
+                            {% if user_form.phone_number.errors %}
+                            <div class="error-message">{{ user_form.phone_number.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ user_form.address.id_for_label }}">Address:</label>
+                            {{ user_form.address }}
+                            {% if user_form.address.errors %}
+                            <div class="error-message">{{ user_form.address.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+                
+                {% if profile_form %}
+                <div class="tab-pane fade" id="role" role="tabpanel" aria-labelledby="role-tab">
+                    <form method="post" class="profile-form" id="role-form">
+                        {% csrf_token %}
+                        
+                        {% if profile_type == 'teacher' %}
+                            <div class="form-group">
+                                <label for="{{ profile_form.department.id_for_label }}">Department:</label>
+                                {{ profile_form.department }}
+                                {% if profile_form.department.errors %}
+                                <div class="error-message">{{ profile_form.department.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ profile_form.subjects.id_for_label }}">Subjects:</label>
+                                {{ profile_form.subjects }}
+                                {% if profile_form.subjects.errors %}
+                                <div class="error-message">{{ profile_form.subjects.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ profile_form.qualification.id_for_label }}">Qualification:</label>
+                                {{ profile_form.qualification }}
+                                {% if profile_form.qualification.errors %}
+                                <div class="error-message">{{ profile_form.qualification.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% elif profile_type == 'student' %}
+                            <div class="form-group">
+                                <label for="{{ profile_form.student_id.id_for_label }}">Student ID:</label>
+                                {{ profile_form.student_id }}
+                                {% if profile_form.student_id.errors %}
+                                <div class="error-message">{{ profile_form.student_id.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ profile_form.grade_level.id_for_label }}">Grade Level:</label>
+                                {{ profile_form.grade_level }}
+                                {% if profile_form.grade_level.errors %}
+                                <div class="error-message">{{ profile_form.grade_level.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ profile_form.guardian_name.id_for_label }}">Guardian Name:</label>
+                                {{ profile_form.guardian_name }}
+                                {% if profile_form.guardian_name.errors %}
+                                <div class="error-message">{{ profile_form.guardian_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ profile_form.guardian_contact.id_for_label }}">Guardian Contact:</label>
+                                {{ profile_form.guardian_contact }}
+                                {% if profile_form.guardian_contact.errors %}
+                                <div class="error-message">{{ profile_form.guardian_contact.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+                {% endif %}
+                
+                <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                    <div class="security-options">
+                        <h3>Security Options</h3>
+                        <p>Manage your account security settings.</p>
+                        
+                        <div class="security-buttons">
+                            <a href="{% url 'accounts:password_change' %}" class="btn btn-outline-primary">Change Password</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .profile-container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin: 2rem auto;
+        padding: 0;
+        overflow: hidden;
+    }
+    
+    .profile-header {
+        background-color: #6b8e23;
+        color: white;
+        padding: 2rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .profile-avatar {
+        margin-right: 2rem;
+    }
+    
+    .profile-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+    }
+    
+    .default-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #f5f5f5;
+        color: #6b8e23;
+        font-size: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        border: 4px solid white;
+    }
+    
+    .profile-info h2 {
+        margin: 0 0 0.5rem;
+    }
+    
+    .profile-info .username {
+        opacity: 0.8;
+        margin: 0.5rem 0;
+    }
+    
+    .profile-info .bio {
+        margin-top: 1rem;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+    }
+    
+    .badge-teacher {
+        background-color: #6b8e23;
+        color: white;
+    }
+    
+    .badge-student {
+        background-color: #9acd32;
+        color: #333;
+        font-weight: 700;
+    }
+    
+    .badge-admin {
+        background-color: #556b2f;
+        color: white;
+    }
+    
+    .profile-tabs {
+        padding: 2rem;
+    }
+    
+    .profile-tabs .nav-tabs {
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-tabs .nav-link {
+        color: #495057;
+        border: 1px solid transparent;
+        border-top-left-radius: 0.25rem;
+        border-top-right-radius: 0.25rem;
+    }
+    
+    .profile-tabs .nav-link:hover {
+        color: #6b8e23;
+        border-color: transparent;
+    }
+    
+    .profile-tabs .nav-link.active {
+        color: #6b8e23;
+        background-color: #fff;
+        border-color: #dee2e6 #dee2e6 #fff;
+        border-bottom: 2px solid #6b8e23;
+    }
+    
+    .tab-content {
+        padding: 1rem 0;
+    }
+    
+    .profile-form {
+        width: 100%;
+    }
+    
+    .form-row {
+        display: flex;
+        margin-right: -15px;
+        margin-left: -15px;
+        flex-wrap: wrap;
+    }
+    
+    .form-row > .col, .form-row > [class*="col-"] {
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+    
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"],
+    .form-group input[type="number"],
+    .form-group input[type="tel"],
+    .form-group textarea,
+    .form-group select {
+        display: block;
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #333;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        transition: border-color 0.3s;
+    }
+    
+    .form-group input[type="text"]:focus,
+    .form-group input[type="email"]:focus,
+    .form-group input[type="password"]:focus,
+    .form-group input[type="number"]:focus,
+    .form-group input[type="tel"]:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #6b8e23;
+        box-shadow: 0 0 0 2px rgba(107, 142, 35, 0.2);
+    }
+    
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .profile-pic-control {
+        & input[type="file"] {
+            display: inline;
+        }
+
+        & label {
+            display: inline;
+            font-weight: normal;
+        }
+    }
+    
+    .security-options {
+        padding: 1rem 0;
+    }
+    
+    .security-buttons {
+        margin-top: 1.5rem;
+    }
+    
+    .messages {
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+    }
+    
+    
+    .error-message {
+        color: var(--bs-danger);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .profile-header {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem;
+        }
+        
+        .profile-avatar {
+            margin-right: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .profile-info h2 {
+            font-size: 1.5rem;
+        }
+        
+        .profile-tabs {
+            padding: 1rem;
+        }
+        
+        .profile-tabs .nav-tabs {
+            flex-wrap: wrap;
+        }
+        
+        .profile-tabs .nav-link {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .profile-form {
+            max-width: 100%;
+        }
+        
+        .form-row {
+            flex-direction: column;
+            margin-right: 0;
+            margin-left: 0;
+        }
+        
+        .form-row > .col,
+        .form-row > [class*="col-"] {
+            padding-right: 0;
+            padding-left: 0;
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        
+        .col-md-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}

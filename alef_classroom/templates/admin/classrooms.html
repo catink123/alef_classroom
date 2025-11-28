@@ -1,0 +1,225 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Manage Classrooms - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <h1>Classroom Management</h1>
+        <p>View and manage all classrooms in the system</p>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-section">
+        <h3>Filter by Status</h3>
+        <div class="filter-buttons">
+            <a href="{% url 'admin_classrooms' %}" class="btn {% if not status_filter %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                All Classrooms
+            </a>
+            <a href="?status=active" class="btn {% if status_filter == 'active' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                Active
+            </a>
+            <a href="?status=inactive" class="btn {% if status_filter == 'inactive' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                Inactive
+            </a>
+            <a href="?status=archived" class="btn {% if status_filter == 'archived' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                Archived
+            </a>
+        </div>
+    </div>
+    
+    <!-- Classrooms Table -->
+    <div class="table-section">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Subject</th>
+                    <th>Section</th>
+                    <th>Creator</th>
+                    <th>Course Code</th>
+                    <th>Members</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for classroom in classrooms %}
+                <tr>
+                    <td><strong>{{ classroom.name }}</strong></td>
+                    <td>{{ classroom.subject|default:"-" }}</td>
+                    <td>{{ classroom.section|default:"-" }}</td>
+                    <td>{{ classroom.creator.username }}</td>
+                    <td><code>{{ classroom.course_code|truncatechars:12 }}</code></td>
+                    <td>
+                        <span class="member-count">
+                            <i class="material-icons">people</i> {{ classroom.members.count }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if classroom.is_archived %}
+                        <span class="badge badge-secondary">Archived</span>
+                        {% elif classroom.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ classroom.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="/admin/classroom/classroom/{{ classroom.id }}/change/" class="btn btn-sm btn-outline-primary" target="_blank">
+                            <i class="material-icons">edit</i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted">No classrooms found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .admin-header {
+        margin-bottom: 2rem;
+    }
+    
+    .admin-header h1 {
+        color: #6b8e23;
+        margin-bottom: 0.5rem;
+        font-size: 2rem;
+    }
+    
+    .admin-header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .filter-section h3 {
+        color: #333;
+        margin: 0 0 1rem 0;
+        font-size: 1rem;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    
+    .table-section {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .admin-table thead {
+        background: #f8f9fa;
+        border-bottom: 2px solid #6b8e23;
+    }
+    
+    .admin-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .admin-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .admin-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .member-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .member-count i {
+        font-size: 1rem;
+    }
+    
+    code {
+        background: #f0f0f0;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.85rem;
+        font-family: monospace;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .badge-success {
+        background: #6b8e23;
+        color: white;
+    }
+    
+    .badge-danger {
+        background: #d32f2f;
+        color: white;
+    }
+    
+    .badge-secondary {
+        background: #999;
+        color: white;
+    }
+    
+    .text-center {
+        text-align: center;
+    }
+    
+    .text-muted {
+        color: #999;
+    }
+    
+    @media (max-width: 768px) {
+        .admin-table {
+            font-size: 0.9rem;
+        }
+        
+        .admin-table th,
+        .admin-table td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .filter-buttons {
+            flex-direction: column;
+        }
+        
+        .filter-buttons .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}

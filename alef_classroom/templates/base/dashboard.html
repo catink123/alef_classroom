@@ -1,0 +1,342 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Alef Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        <p>Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+    </div>
+    
+    <!-- Quick Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="material-icons">school</i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ classroom_count }}</div>
+                <div class="stat-label">{% if user.is_teacher or user.is_admin %}Classes Teaching{% else %}Classes Enrolled{% endif %}</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="material-icons">assignment</i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ assignment_count }}</div>
+                <div class="stat-label">{% if user.is_teacher or user.is_admin %}Assignments Created{% else %}Pending Assignments{% endif %}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <div class="action-buttons">
+            {% if user.is_teacher or user.is_admin %}
+                <a href="{% url 'classroom:create' %}" class="btn btn-primary">
+                    <i class="material-icons">add</i> Create Classroom
+                </a>
+                {% if recent_classrooms %}
+                    <a href="{% url 'assignment:create' recent_classrooms.0.slug %}" class="btn btn-outline-primary">
+                        <i class="material-icons">assignment</i> Create Assignment
+                    </a>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'classroom:join' %}" class="btn btn-primary">
+                    <i class="material-icons">add_circle</i> Join Classroom
+                </a>
+            {% endif %}
+            <a href="{% url 'classroom:list' %}" class="btn btn-outline-primary">
+                <i class="material-icons">list</i> View Classes
+            </a>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">
+                <i class="material-icons">person</i> Profile
+            </a>
+        </div>
+    </div>
+    
+    <!-- Recent Classes Grid -->
+    {% if recent_classrooms %}
+    <div class="recent-section">
+        <h3>Recent Classes</h3>
+        <div class="classroom-grid">
+            {% for classroom in recent_classrooms %}
+            <a href="{% url 'classroom:detail' classroom.pk %}" class="classroom-item">
+                <div class="classroom-item-header">
+                    <h4>{{ classroom.name }}</h4>
+                    <span class="classroom-date">{{ classroom.created_at|date:"M d" }}</span>
+                </div>
+                {% if classroom.section %}
+                    <p class="classroom-section">{{ classroom.section }}</p>
+                {% endif %}
+                {% if classroom.subject %}
+                    <p class="classroom-subject">{{ classroom.subject }}</p>
+                {% endif %}
+                <div class="classroom-footer">
+                    <span class="student-count"><i class="material-icons">people</i> {{ classroom.student_count }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Recent Activity -->
+    {% if activities %}
+    <div class="recent-section">
+        <h3>Recent Activity</h3>
+        <div class="activity-list">
+            {% for activity in activities %}
+            <div class="activity-item">
+                <div class="activity-header">
+                    <h5>{{ activity.title }}</h5>
+                    <span class="activity-time">{{ activity.timestamp|date:"M d, g:i A" }}</span>
+                </div>
+                <p class="activity-description">{{ activity.description }}</p>
+                <small class="activity-user">by {{ activity.user }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .dashboard-header {
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-header h1 {
+        color: #6b8e23;
+        margin-bottom: 0.5rem;
+        font-size: 2rem;
+    }
+    
+    .dashboard-header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        color: #6b8e23;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .stat-content {
+        flex: 1;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        color: #666;
+    }
+    
+    .quick-actions {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .quick-actions h3 {
+        color: #333;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    
+    .recent-section {
+        margin-bottom: 2rem;
+    }
+    
+    .recent-section h3 {
+        color: #333;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .classroom-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .classroom-item {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.3s, box-shadow 0.3s;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .classroom-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .classroom-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+    
+    .classroom-item-header h4 {
+        margin: 0;
+        font-size: 1rem;
+        color: #333;
+        flex: 1;
+    }
+    
+    .classroom-date {
+        font-size: 0.75rem;
+        color: #999;
+        white-space: nowrap;
+        margin-left: 0.5rem;
+    }
+    
+    .classroom-section {
+        font-size: 0.875rem;
+        color: #666;
+        margin: 0.25rem 0;
+    }
+    
+    .classroom-subject {
+        font-size: 0.8rem;
+        color: #999;
+        margin: 0;
+    }
+    
+    .classroom-footer {
+        margin-top: auto;
+        padding-top: 0.75rem;
+        border-top: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: #666;
+    }
+    
+    .student-count {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .student-count i {
+        font-size: 1rem;
+    }
+    
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .activity-item {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid #6b8e23;
+    }
+    
+    .activity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+    
+    .activity-header h5 {
+        margin: 0;
+        font-size: 1rem;
+        color: #333;
+    }
+    
+    .activity-time {
+        font-size: 0.75rem;
+        color: #999;
+        white-space: nowrap;
+    }
+    
+    .activity-description {
+        margin: 0.5rem 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .activity-user {
+        color: #999;
+        font-size: 0.8rem;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .classroom-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

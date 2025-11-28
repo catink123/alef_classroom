@@ -1,0 +1,219 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Edit Submission - {{ assignment.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .submission-edit-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .submission-edit-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .submission-edit-header h1 {
+        color: #6b8e23;
+        margin-bottom: 0.5rem;
+    }
+    
+    .submission-edit-header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    .assignment-info {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    
+    .assignment-info h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+    }
+    
+    .assignment-info p {
+        margin: 0.5rem 0;
+        color: #666;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #6b8e23;
+        box-shadow: 0 0 0 2px rgba(107, 142, 35, 0.2);
+    }
+    
+    .file-upload {
+        border: 2px dashed #ddd;
+        border-radius: 4px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .file-upload:hover {
+        border-color: #6b8e23;
+    }
+    
+    .file-upload input[type="file"] {
+        margin-bottom: 1rem;
+    }
+    
+    .current-files {
+        margin-top: 1rem;
+    }
+    
+    .current-files h4 {
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .file-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .file-item a {
+        color: #6b8e23;
+        text-decoration: none;
+    }
+    
+    .file-item a:hover {
+        text-decoration: underline;
+    }
+    
+    .btn-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+    
+    .errorlist li {
+        color: #d32f2f;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .help-text {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="submission-edit-container">
+    <div class="submission-edit-header">
+        <h1>Edit Submission</h1>
+        <p>Update your submission for "{{ assignment.title }}"</p>
+    </div>
+    
+    <div class="assignment-info">
+        <h3>{{ assignment.title }}</h3>
+        <p><strong>Due Date:</strong> {{ assignment.due_date|date:"F j, Y g:i A" }}</p>
+        <p><strong>Points:</strong> {{ assignment.points }}</p>
+        {% if assignment.description %}
+            <p><strong>Description:</strong> {{ assignment.description|truncatewords:50 }}</p>
+        {% endif %}
+    </div>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.content.id_for_label }}">Submission Content</label>
+            {{ form.content }}
+            {% if form.content.errors %}
+                <ul class="errorlist">
+                    {% for error in form.content.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% if form.content.help_text %}
+                <div class="help-text">{{ form.content.help_text }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.attachments.id_for_label }}">Attachments</label>
+            <div class="file-upload">
+                {{ form.attachments }}
+                <p>You can upload multiple files. Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG, GIF</p>
+            </div>
+            {% if form.attachments.errors %}
+                <ul class="errorlist">
+                    {% for error in form.attachments.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        
+        {% if submission.attachments.all %}
+            <div class="current-files">
+                <h4>Current Attachments:</h4>
+                {% for attachment in submission.attachments.all %}
+                    <div class="file-item">
+                        <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.file.name|slice:"7:" }}</a>
+                        <span>{{ attachment.file.size|filesizeformat }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="btn-container">
+            <a href="{% url 'assignment:detail' assignment.pk %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update Submission</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

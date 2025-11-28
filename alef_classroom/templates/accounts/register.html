@@ -1,0 +1,152 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Register - Alef Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-container">
+        <h2>Register</h2>
+        
+        
+        <form method="post" action="{% url 'accounts:register' %}" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username:</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                <div class="error-message">{{ form.username.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="{{ form.first_name.id_for_label }}">First Name:</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                    <div class="error-message">{{ form.first_name.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group col-md-6">
+                    <label for="{{ form.last_name.id_for_label }}">Last Name:</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                    <div class="error-message">{{ form.last_name.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            
+            <div class="form-group">
+                <label for="{{ form.role.id_for_label }}">Role:</label>
+                {{ form.role }}
+                {% if form.role.errors %}
+                <div class="error-message">{{ form.role.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}">Password:</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                <div class="error-message">{{ form.password1.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                <div class="error-message">{{ form.password2.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{% url 'accounts:login' %}">Login here</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .auth-container h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #6b8e23;
+    }
+    
+    .auth-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-row {
+        display: flex;
+        margin-right: -15px;
+        margin-left: -15px;
+    }
+    
+    .form-row > .col, .form-row > [class*="col-"] {
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+    
+    .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    
+    .auth-form label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .auth-form .form-control, .auth-form select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .auth-form .btn-block {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .error-message {
+        color: var(--bs-danger);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    
+    .auth-footer {
+        margin-top: 2rem;
+        text-align: center;
+    }
+    
+    .form-text {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #757575;
+    }
+    
+</style>
+{% endblock %}

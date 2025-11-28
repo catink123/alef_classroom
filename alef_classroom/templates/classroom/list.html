@@ -1,0 +1,433 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Classrooms - Alef Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="classroom-header">
+        <h1>{% if user.is_admin %}All Classrooms{% else %}My Classrooms{% endif %}</h1>
+        <div class="classroom-actions">
+            {% if user.is_teacher or user.is_admin %}
+                <button class="btn btn-primary" id="create-btn">Create Class</button>
+            {% endif %}
+            <button class="btn btn-outline-primary" id="join-btn">Join Class</button>
+        </div>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <!-- Join Modal -->
+    <div id="join-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Join Class</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Ask your teacher for the class code, then enter it here.</p>
+                <form method="post" action="{% url 'classroom:join' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ join_form.course_code }}
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Join</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="classroom-sections">
+        {% if teaching_classrooms %}
+        <section class="classroom-section">
+            <h2>{% if user.is_admin %}All Classrooms{% else %}Classes You Teach{% endif %}</h2>
+            <div class="classroom-grid">
+                {% for classroom in teaching_classrooms %}
+                {% with slug=classroom.name|slugify %}
+                <a href="{% url 'classroom:detail' classroom.pk %}" class="classroom-card-link">
+                    <div class="classroom-card" style="view-transition-name: classroom-whole-{{ slug }}">
+                        <div class="classroom-card-header" style="view-transition-name: classroom-banner-{{ slug }}">
+                            {% if classroom.banner_image %}
+                            <img src="{{ classroom.banner_image.url }}" alt="{{ classroom.name }}">
+                            {% else %}
+                            <div class="default-banner" style="background-color: #6b8e23;"></div>
+                            {% endif %}
+                        </div>
+                        <div class="classroom-card-content">
+                            <h3 style="view-transition-name: classroom-title-{{ slug }}">{{ classroom.name }}</h3>
+                            {% if classroom.section %}
+                            <p class="section" style="view-transition-name: classroom-section-{{ slug }};">{{ classroom.section }}</p>
+                            {% endif %}
+                            {% if classroom.subject %}
+                            <p class="subject" style="view-transition-name: classroom-subject-{{ slug }};">{{ classroom.subject }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="classroom-card-footer">
+                            <div class="classroom-stats">
+                                <span class="student-count" title="Students"><i class="material-icons">people</i> {{ classroom.student_count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endwith %}
+                {% endfor %}
+                
+                <!-- Create classroom card (only for teachers and admins) -->
+                {% if user.is_teacher or user.is_admin %}
+                <div class="classroom-card create-card" onclick="window.location='{% url 'classroom:create' %}'">
+                    <div class="create-card-content">
+                        <i class="material-icons">add_circle</i>
+                        <p>Create Class</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
+        
+        {% if enrolled_classrooms %}
+        <section class="classroom-section">
+            <h2>Classes You're Enrolled In</h2>
+            <div class="classroom-grid">
+                {% for classroom in enrolled_classrooms %}
+                {% with slug=classroom.name|slugify %}
+                <a href="{% url 'classroom:detail' classroom.pk %}" class="classroom-card-link">
+                    <div class="classroom-card" style="view-transition-name: classroom-whole-{{ slug }}">
+                        <div class="classroom-card-header" style="view-transition-name: classroom-banner-{{ slug }}">
+                            {% if classroom.banner_image %}
+                            <img src="{{ classroom.banner_image.url }}" alt="{{ classroom.name }}">
+                            {% else %}
+                            <div class="default-banner"></div>
+                            {% endif %}
+                        </div>
+                        <div class="classroom-card-content">
+                            <h3 style="view-transition-name: classroom-title-{{ slug }}">{{ classroom.name }}</h3>
+                            {% if classroom.section %}
+                            <p class="section" style="view-transition-name: classroom-section-{{ slug }};">{{ classroom.section }}</p>
+                            {% endif %}
+                            {% if classroom.subject %}
+                            <p class="subject" style="view-transition-name: classroom-subject-{{ slug }};">{{ classroom.subject }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endwith %}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        
+        {% if not teaching_classrooms and not enrolled_classrooms %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="material-icons">school</i>
+            </div>
+            <h2>No classrooms yet</h2>
+            <p>{% if user.is_teacher or user.is_admin %}Create a class or join one to get started{% else %}Join a class to get started{% endif %}</p>
+            <div class="empty-state-actions">
+                {% if user.is_teacher or user.is_admin %}
+                    <a href="{% url 'classroom:create' %}" class="btn btn-primary">Create Class</a>
+                {% endif %}
+                <button class="btn btn-outline-primary" id="empty-join-btn">Join Class</button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const joinModal = document.getElementById('join-modal');
+        const createBtn = document.getElementById('create-btn');
+        const joinBtn = document.getElementById('join-btn');
+        const emptyJoinBtn = document.getElementById('empty-join-btn');
+        const closeBtn = document.querySelector('.close');
+        
+        // Open modal functions
+        const openJoinModal = function() {
+            joinModal.style.display = 'block';
+        };
+        
+        // Open create page (only if button exists)
+        if (createBtn) {
+            createBtn.addEventListener('click', function() {
+                window.location.href = "{% url 'classroom:create' %}";
+            });
+        }
+        
+        // Open join modal
+        if (joinBtn) {
+            joinBtn.addEventListener('click', openJoinModal);
+        }
+        
+        // Open join modal from empty state
+        if (emptyJoinBtn) {
+            emptyJoinBtn.addEventListener('click', openJoinModal);
+        }
+        
+        // Close modal
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                joinModal.style.display = 'none';
+            });
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === joinModal) {
+                joinModal.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<style>
+    .classroom-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .classroom-header h1 {
+        color: #6b8e23;
+        margin: 0;
+    }
+    
+    .classroom-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .classroom-sections {
+        margin-top: 2rem;
+    }
+    
+    .classroom-section {
+        margin-bottom: 3rem;
+    }
+    
+    .classroom-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #333;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+    
+    .classroom-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-gap: 1.5rem;
+    }
+    
+    .classroom-card-link {
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .classroom-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .classroom-card-link:hover .classroom-card {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .classroom-card-header {
+        height: 100px;
+        overflow: hidden;
+    }
+    
+    .classroom-card-header img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .default-banner {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #6b8e23, #9acd32);
+    }
+    
+    .classroom-card-content {
+        padding: 1rem;
+    }
+    
+    .classroom-card-content h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1.25rem;
+    }
+    
+    .classroom-card-content .section,
+    .classroom-card-content .subject {
+        margin: 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .classroom-card-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-top: 1px solid #eee;
+        margin-top: auto;
+    }
+    
+    .classroom-stats {
+        display: flex;
+        align-items: center;
+        color: #666;
+        font-size: 0.875rem;
+    }
+    
+    .classroom-stats i {
+        font-size: 1rem;
+        margin-right: 0.25rem;
+        vertical-align: middle;
+    }
+    
+    .create-card {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        border: 2px dashed #ccc;
+        background-color: transparent;
+        cursor: pointer;
+    }
+    
+    .create-card-content {
+        text-align: center;
+        color: #666;
+    }
+    
+    .create-card-content i {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        color: #6b8e23;
+    }
+    
+    .create-card-content p {
+        margin: 0;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .empty-state-icon {
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state-icon i {
+        font-size: 4rem;
+        color: #6b8e23;
+    }
+    
+    .empty-state h2 {
+        margin: 0 0 0.5rem;
+        color: #333;
+    }
+    
+    .empty-state p {
+        margin-bottom: 2rem;
+        color: #666;
+    }
+    
+    .empty-state-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 0;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #6b8e23;
+    }
+    
+    .close {
+        color: #999;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+    
+    .close:hover {
+        color: #333;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-body p {
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .classroom-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .classroom-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Create Classroom - Alef Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <div class="form-header">
+            <h1>Create Classroom</h1>
+        </div>
+        
+        
+        <form method="post" enctype="multipart/form-data" class="create-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">Class Name <span class="required">*</span></label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <div class="error-message">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.section.id_for_label }}">Section</label>
+                {{ form.section }}
+                {% if form.section.errors %}
+                <div class="error-message">{{ form.section.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">Example: "Period 3" or "10th Grade"</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.subject.id_for_label }}">Subject</label>
+                {{ form.subject }}
+                {% if form.subject.errors %}
+                <div class="error-message">{{ form.subject.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <div class="error-message">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.banner_image.id_for_label }}">Banner Image</label>
+                {{ form.banner_image }}
+                {% if form.banner_image.errors %}
+                <div class="error-message">{{ form.banner_image.errors }}</div>
+                {% endif %}
+                <small class="form-text text-muted">Recommended size: 1200 x 300 pixels</small>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create Classroom</button>
+                <a href="{% url 'classroom:list' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-header {
+        margin-bottom: 2rem;
+    }
+    
+    .form-header h1 {
+        color: #6b8e23;
+        margin: 0;
+    }
+    
+    .create-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .create-form label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .required {
+        color: var(--bs-danger);
+    }
+    
+    .form-control {
+        display: block;
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    
+    .form-text {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .error-message {
+        color: var(--bs-danger);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+</style>
+{% endblock %}

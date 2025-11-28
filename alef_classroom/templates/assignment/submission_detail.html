@@ -1,0 +1,283 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Submission Detail - {{ assignment.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .submission-detail-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .submission-detail-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .submission-detail-header h1 {
+        color: #6b8e23;
+        margin-bottom: 0.5rem;
+    }
+    
+    .submission-detail-header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    .submission-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .info-card {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 4px;
+    }
+    
+    .info-card h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+    }
+    
+    .info-card p {
+        margin: 0.5rem 0;
+        color: #666;
+    }
+    
+    .submission-content {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    
+    .submission-content h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+    }
+    
+    .submission-content p {
+        margin: 0;
+        color: #666;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+    
+    .attachments {
+        margin-bottom: 2rem;
+    }
+    
+    .attachments h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+    }
+    
+    .attachment-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .attachment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .attachment-item a {
+        color: #6b8e23;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .attachment-item a:hover {
+        text-decoration: underline;
+    }
+    
+    .attachment-size {
+        color: #666;
+        font-size: 0.875rem;
+    }
+    
+    .grading-section {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 4px;
+        margin-bottom: 2rem;
+    }
+    
+    .grading-section h3 {
+        margin: 0 0 1rem 0;
+        color: #333;
+    }
+    
+    .grade-display {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .grade-display .grade {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #6b8e23;
+    }
+    
+    .grade-display .max-points {
+        color: #666;
+    }
+    
+    .feedback {
+        margin-top: 1rem;
+    }
+    
+    .feedback h4 {
+        margin: 0 0 0.5rem 0;
+        color: #333;
+    }
+    
+    .feedback p {
+        margin: 0;
+        color: #666;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+    
+    .btn-container {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .status-submitted {
+        background-color: #e8f5e8;
+        color: #2e7d32;
+    }
+    
+    .status-graded {
+        background-color: #e8f5e8;
+        color: #6b8e23;
+    }
+    
+    .status-late {
+        background-color: #ffebee;
+        color: #d32f2f;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="submission-detail-container">
+    <div class="submission-detail-header">
+        <h1>Submission Detail</h1>
+        <p>View submission for "{{ assignment.title }}" by {{ submission.student.get_full_name|default:submission.student.username }}</p>
+    </div>
+    
+    <div class="submission-info">
+        <div class="info-card">
+            <h3>Student Information</h3>
+            <p><strong>Name:</strong> {{ submission.student.get_full_name|default:submission.student.username }}</p>
+            <p><strong>Username:</strong> {{ submission.student.username }}</p>
+            <p><strong>Submitted:</strong> {{ submission.submitted_at|date:"F j, Y g:i A" }}</p>
+            <p><strong>Status:</strong> 
+                {% if submission.is_graded %}
+                    <span class="status-badge status-graded">Graded</span>
+                {% elif submission.is_late %}
+                    <span class="status-badge status-late">Late</span>
+                {% else %}
+                    <span class="status-badge status-submitted">Submitted</span>
+                {% endif %}
+            </p>
+        </div>
+        
+        <div class="info-card">
+            <h3>Assignment Information</h3>
+            <p><strong>Title:</strong> {{ assignment.title }}</p>
+            <p><strong>Due Date:</strong> {{ assignment.due_date|date:"F j, Y g:i A" }}</p>
+            <p><strong>Points:</strong> {{ assignment.points_possible }}</p>
+            <p><strong>Classroom:</strong> {{ assignment.classroom.name }}</p>
+        </div>
+    </div>
+    
+    {% if submission.content %}
+        <div class="submission-content">
+            <h3>Submission Content</h3>
+            <p>{{ submission.content }}</p>
+        </div>
+    {% endif %}
+    
+    {% if submission.attachment %}
+        <div class="attachments">
+            <h3>Attachments</h3>
+            <ul class="attachment-list">
+                <li class="attachment-item">
+                    <a href="{{ submission.attachment.url }}" target="_blank" download>
+                        <i class="fas fa-file me-2"></i>{{ submission.attachment.name|slice:"24:" }}
+                    </a>
+                    <span class="attachment-size">{{ submission.attachment.size|filesizeformat }}</span>
+                </li>
+            </ul>
+        </div>
+    {% endif %}
+    
+    <div class="grading-section">
+        <h3>Grading</h3>
+        {% if submission.is_graded %}
+            <div class="grade-display">
+                <span class="grade">{{ submission.points_earned|default:"0" }}</span>
+                <span class="max-points">/ {{ assignment.points_possible }} points</span>
+            </div>
+            {% if submission.feedback %}
+                <div class="feedback">
+                    <h4>Feedback</h4>
+                    <p>{{ submission.feedback }}</p>
+                </div>
+            {% endif %}
+            {% if submission.graded_by %}
+                <p class="text-muted" style="margin-top: 0.5rem; font-size: 0.875rem;">
+                    Graded by {{ submission.graded_by.get_full_name|default:submission.graded_by.username }} 
+                    on {{ submission.graded_at|date:"F j, Y g:i A" }}
+                </p>
+            {% endif %}
+        {% else %}
+            <p>This submission has not been graded yet.</p>
+        {% endif %}
+    </div>
+    
+    <div class="btn-container">
+        <a href="{% url 'assignment:submissions' assignment.pk %}" class="btn btn-secondary">Back to Submissions</a>
+        {% if is_teacher %}
+            {% if not submission.is_graded %}
+                <a href="{% url 'assignment:grade' submission.pk %}" class="btn btn-primary">Grade Submission</a>
+            {% else %}
+                <a href="{% url 'assignment:grade' submission.pk %}" class="btn btn-primary">Update Grade</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,264 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load assignment_filters %}
+
+{% block title %}{{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header with breadcrumbs -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">{{ assignment.title }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'classroom:detail' pk=classroom.pk %}">{{ classroom.name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'assignment:list' classroom_slug=classroom.slug %}">Assignments</a></li>
+                    <li class="breadcrumb-item active">{{ assignment.title }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col-md-4 text-md-end">
+            {% if is_teacher %}
+                <div class="btn-group">
+                    <a href="{% url 'assignment:edit' pk=assignment.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit me-1"></i> Edit
+                    </a>
+                    <a href="{% url 'assignment:submissions' assignment_id=assignment.id %}" class="btn btn-outline-info">
+                        <i class="fas fa-clipboard-list me-1"></i> Submissions
+                    </a>
+                    <a href="{% url 'assignment:delete' pk=assignment.id %}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash-alt me-1"></i> Delete
+                    </a>
+                </div>
+            {% elif not user_submission and assignment.is_published and not assignment.is_draft %}
+                <a href="{% url 'assignment:submit' assignment_id=assignment.id %}" class="btn btn-success">
+                    <i class="fas fa-paper-plane me-1"></i> Submit Assignment
+                </a>
+            {% elif user_submission and not user_submission.is_graded %}
+                <a href="{% url 'assignment:edit_submission' pk=user_submission.id %}" class="btn btn-warning">
+                    <i class="fas fa-edit me-1"></i> Edit Submission
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Assignment status badges -->
+    <div class="mb-4">
+        {% if assignment.is_draft %}
+            <span class="badge bg-secondary me-2">Draft</span>
+        {% endif %}
+        {% if not assignment.is_published %}
+            <span class="badge bg-warning text-dark me-2">Unpublished</span>
+        {% endif %}
+        {% if assignment.due_date < now %}
+            <span class="badge bg-danger me-2">Closed</span>
+        {% elif assignment.due_date|date:'Y-m-d' == now|date:'Y-m-d' %}
+            <span class="badge bg-warning text-dark me-2">Due Today</span>
+        {% endif %}
+        <span class="badge bg-info me-2">{{ assignment.points_possible }} Points</span>
+    </div>
+
+    <!-- Main content area -->
+    <div class="row">
+        <!-- Assignment information -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Instructions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6>Description</h6>
+                        <p>{{ assignment.description|linebreaks }}</p>
+                    </div>
+                    
+                    {% if assignment.instructions %}
+                        <div class="mb-4">
+                            <h6>Detailed Instructions</h6>
+                            <p>{{ assignment.instructions|linebreaks }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    {% if assignment.attachment %}
+                        <div class="mb-4">
+                            <h6>Attached Files</h6>
+                            <div class="d-flex align-items-center border rounded p-2">
+                                <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                                <div>
+                                    <div>{{ assignment.attachment.name|filename }}</div>
+                                    <small class="text-muted">Click to download</small>
+                                </div>
+                                <a href="{{ assignment.attachment.url }}" class="btn btn-sm btn-outline-primary ms-auto" download>
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- User submission section (for students) -->
+            {% if not is_teacher and user_submission %}
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Your Submission</h5>
+                        <span class="badge {% if user_submission.is_late %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                            {% if user_submission.is_late %}Submitted Late{% else %}On Time{% endif %}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <p>Submitted on: {{ user_submission.submitted_at|date:"M d, Y h:i A" }}</p>
+                            
+                            {% if user_submission.content %}
+                                <h6>Your Answer</h6>
+                                <p>{{ user_submission.content|linebreaks }}</p>
+                            {% endif %}
+                            
+                            {% if user_submission.attachment %}
+                                <h6>Your Attachment</h6>
+                                <div class="d-flex align-items-center border rounded p-2">
+                                    <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                                    <div>
+                                        <div>{{ user_submission.attachment.name|filename }}</div>
+                                        <small class="text-muted">Click to download</small>
+                                    </div>
+                                    <a href="{{ user_submission.attachment.url }}" class="btn btn-sm btn-outline-primary ms-auto" download>
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if user_submission.is_graded %}
+                            <div class="alert alert-success">
+                                <h6>Grade: {{ user_submission.points_earned }}/{{ assignment.points_possible }}</h6>
+                                {% if user_submission.feedback %}
+                                    <h6 class="mt-3">Feedback:</h6>
+                                    <p>{{ user_submission.feedback|linebreaks }}</p>
+                                {% endif %}
+                                <p class="mb-0"><small>Graded by: {{ user_submission.graded_by.get_full_name|default:user_submission.graded_by.username }} on {{ user_submission.graded_at|date:"M d, Y" }}</small></p>
+                            </div>
+                        {% elif not user_submission.is_graded %}
+                            <div class="alert alert-info">
+                                <p class="mb-0">Your submission has not been graded yet.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Comments section -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Comments</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Comment form -->
+                    <form action="{% url 'assignment:assignment_comment' assignment_id=assignment.id %}" method="post" class="mb-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Add a Comment</label>
+                            <textarea class="form-control" id="comment" name="content" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Post Comment</button>
+                    </form>
+                    
+                    <!-- Comment list -->
+                    <div class="comments-section">
+                        {% if comments %}
+                            {% for comment in comments %}
+                                <div class="comment mb-3 p-3 border rounded">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <div>
+                                            <strong>{{ comment.author.get_full_name|default:comment.author.username }}</strong>
+                                            {% if comment.author == assignment.created_by %}
+                                                <span class="badge bg-info ms-2">Teacher</span>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted">{{ comment.created_at|date:"M d, Y h:i A" }}</small>
+                                    </div>
+                                    <p class="mb-0">{{ comment.content|linebreaks }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No comments yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Assignment Details</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Due Date</span>
+                        <strong>{{ assignment.due_date|date:"M d, Y h:i A" }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Points</span>
+                        <strong>{{ assignment.points_possible }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Created By</span>
+                        <strong>{{ assignment.created_by.get_full_name|default:assignment.created_by.username }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Classroom</span>
+                        <strong>{{ classroom.name }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Created On</span>
+                        <strong>{{ assignment.created_at|date:"M d, Y" }}</strong>
+                    </li>
+                    {% if assignment.allow_late_submissions %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Late Submissions</span>
+                            <strong>
+                                Allowed 
+                                {% if assignment.late_penalty_percentage > 0 %}
+                                    ({{ assignment.late_penalty_percentage }}% penalty)
+                                {% endif %}
+                            </strong>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Late Submissions</span>
+                            <strong class="text-danger">Not Allowed</strong>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            {% if is_teacher %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Submission Statistics</h5>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Total Submissions</span>
+                            <strong>{{ assignment.submission_count }}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Graded</span>
+                            <strong>{{ assignment.graded_count }}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Pending</span>
+                            <strong>{{ assignment.submission_count|subtract:assignment.graded_count }}</strong>
+                        </li>
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,341 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Alef Classroom{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="admin-header">
+        <h1>Admin Dashboard</h1>
+        <p>System Overview & Supervision</p>
+    </div>
+    
+    <!-- User Statistics -->
+    <div class="admin-section">
+        <h2>User Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">people</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ total_users }}</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">school</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ total_teachers }}</div>
+                    <div class="stat-label">Teachers</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">person</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ total_students }}</div>
+                    <div class="stat-label">Students</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">admin_panel_settings</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ total_admins }}</div>
+                    <div class="stat-label">Admins</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Classroom Statistics -->
+    <div class="admin-section">
+        <h2>Classroom Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">class</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ total_classrooms }}</div>
+                    <div class="stat-label">Total Classrooms</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">check_circle</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ active_classrooms }}</div>
+                    <div class="stat-label">Active</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">archive</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ archived_classrooms }}</div>
+                    <div class="stat-label">Archived</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Assignment & Submission Statistics -->
+    <div class="admin-section">
+        <h2>Assignment & Submission Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">assignment</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ total_assignments }}</div>
+                    <div class="stat-label">Total Assignments</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">upload</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ total_submissions }}</div>
+                    <div class="stat-label">Total Submissions</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">done</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ graded_submissions }}</div>
+                    <div class="stat-label">Graded</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="material-icons">pending</i></div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ pending_submissions }}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="admin-section">
+        <h2>Quick Actions</h2>
+        <div class="action-buttons">
+            <a href="{% url 'admin_users' %}" class="btn btn-primary">
+                <i class="material-icons">people</i> Manage Users
+            </a>
+            <a href="{% url 'admin_classrooms' %}" class="btn btn-primary">
+                <i class="material-icons">class</i> Manage Classrooms
+            </a>
+            <a href="{% url 'admin_submissions' %}" class="btn btn-primary">
+                <i class="material-icons">assignment</i> View Submissions
+            </a>
+            <a href="/admin/" class="btn btn-outline-primary">
+                <i class="material-icons">settings</i> Django Admin
+            </a>
+        </div>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="admin-section">
+        <h2>Recent Activity</h2>
+        <div class="activity-grid">
+            <div class="activity-column">
+                <h3>Recent Classrooms</h3>
+                <div class="activity-list">
+                    {% for classroom in recent_classrooms %}
+                    <div class="activity-item">
+                        <div class="activity-title">{{ classroom.name }}</div>
+                        <div class="activity-meta">
+                            <span>by {{ classroom.creator.username }}</span>
+                            <span>{{ classroom.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">No recent classrooms</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="activity-column">
+                <h3>Recent Assignments</h3>
+                <div class="activity-list">
+                    {% for assignment in recent_assignments %}
+                    <div class="activity-item">
+                        <div class="activity-title">{{ assignment.title }}</div>
+                        <div class="activity-meta">
+                            <span>{{ assignment.classroom.name }}</span>
+                            <span>{{ assignment.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">No recent assignments</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="activity-column">
+                <h3>Recent Submissions</h3>
+                <div class="activity-list">
+                    {% for submission in recent_submissions %}
+                    <div class="activity-item">
+                        <div class="activity-title">{{ submission.student.username }}</div>
+                        <div class="activity-meta">
+                            <span>{{ submission.assignment.title }}</span>
+                            <span>{{ submission.submitted_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">No recent submissions</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-header {
+        margin-bottom: 2rem;
+    }
+    
+    .admin-header h1 {
+        color: #6b8e23;
+        margin-bottom: 0.5rem;
+        font-size: 2rem;
+    }
+    
+    .admin-header p {
+        color: #666;
+        margin: 0;
+    }
+    
+    .admin-section {
+        margin-bottom: 2.5rem;
+    }
+    
+    .admin-section h2 {
+        color: #333;
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+        border-bottom: 2px solid #6b8e23;
+        padding-bottom: 0.5rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        color: #6b8e23;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .stat-content {
+        flex: 1;
+    }
+    
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        color: #666;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .activity-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .activity-column {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .activity-column h3 {
+        color: #333;
+        margin: 0 0 1rem 0;
+        font-size: 1rem;
+        border-bottom: 2px solid #6b8e23;
+        padding-bottom: 0.5rem;
+    }
+    
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .activity-item {
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border-left: 3px solid #6b8e23;
+    }
+    
+    .activity-title {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .activity-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: #999;
+    }
+    
+    .text-muted {
+        color: #999;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .activity-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

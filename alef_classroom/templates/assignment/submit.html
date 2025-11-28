@@ -1,0 +1,145 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load assignment_filters %}
+
+{% block title %}Submit Assignment - {{ assignment.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-3">Submit Assignment</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'classroom:detail' pk=assignment.classroom.pk %}">{{ assignment.classroom.name }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'assignment:list' classroom_slug=assignment.classroom.slug %}">Assignments</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'assignment:detail' pk=assignment.id %}">{{ assignment.title }}</a></li>
+                    <li class="breadcrumb-item active">Submit</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Assignment Details</h5>
+                </div>
+                <div class="card-body">
+                    <h3 class="mb-3">{{ assignment.title }}</h3>
+                    <p>{{ assignment.description }}</p>
+                    
+                    {% if assignment.instructions %}
+                        <h5 class="mt-4">Instructions</h5>
+                        <p>{{ assignment.instructions }}</p>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <strong>Due:</strong> {{ assignment.due_date|date:"M d, Y h:i A" }}
+                        </div>
+                        <div>
+                            <strong>Points:</strong> {{ assignment.points_possible }}
+                        </div>
+                    </div>
+                    
+                    {% if is_late %}
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Note:</strong> This assignment is being submitted after the due date.
+                            {% if assignment.allow_late_submissions %}
+                                {% if assignment.late_penalty_percentage > 0 %}
+                                    A {{ assignment.late_penalty_percentage }}% penalty will be applied.
+                                {% endif %}
+                            {% else %}
+                                Late submissions are not accepted for this assignment.
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Your Submission</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Your Answer</label>
+                            <textarea class="form-control" id="content" name="content" rows="10"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="attachment" class="form-label">Attachment</label>
+                            <input class="form-control" type="file" id="attachment" name="attachment">
+                            <div class="form-text">Upload your completed work (optional).</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'assignment:detail' pk=assignment.id %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Submit Assignment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Submission Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Read Instructions:</strong> Ensure you understand what is required.
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Format Properly:</strong> Submit work in the required format.
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Complete All Parts:</strong> Ensure all parts of the assignment are completed.
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Check Your Work:</strong> Review for errors before submitting.
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            <strong>Confirm Submission:</strong> Verify your work was submitted successfully.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            {% if assignment.attachment %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Assignment Files</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center border rounded p-2">
+                            <i class="fas fa-file-alt fa-2x text-primary me-3"></i>
+                            <div class="flex-grow-1">
+                                <div>{{ assignment.attachment.name|filename }}</div>
+                                <small class="text-muted">Click to download</small>
+                            </div>
+                            <a href="{{ assignment.attachment.url }}" class="btn btn-sm btn-outline-primary" download>
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
