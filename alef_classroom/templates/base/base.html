@@ -67,7 +67,7 @@
                                     {% else %}
                                     <i class="fas fa-user-circle me-1"></i>
                                     {% endif %}
-                                    {{ user.username }}
+                                    {{ user.get_full_name|default:user.username }}
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                     <li><a class="dropdown-item d-flex align-items-center" href="{% url 'accounts:profile' %}">

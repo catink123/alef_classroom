@@ -43,7 +43,7 @@
             <tbody>
                 {% for user in users %}
                 <tr>
-                    <td><strong>{{ user.username }}</strong></td>
+                    <td><strong>{{ user.get_full_name|default:user.username }}</strong></td>
                     <td>{{ user.get_full_name|default:"-" }}</td>
                     <td>{{ user.email|default:"-" }}</td>
                     <td>

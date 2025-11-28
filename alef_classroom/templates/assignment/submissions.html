@@ -186,22 +186,22 @@
                         <td>
                             {% if submission.is_late %}
                                 <span class="status-badge status-late">Late</span>
-                            {% elif submission.grade is not None %}
+                            {% elif submission.is_graded %}
                                 <span class="status-badge status-graded">Graded</span>
                             {% else %}
                                 <span class="status-badge status-submitted">Submitted</span>
                             {% endif %}
                         </td>
                         <td>
-                            {% if submission.grade is not None %}
-                                {{ submission.grade }}/{{ assignment.points }}
+                            {% if submission.is_graded %}
+                                {{ submission.points_earned }}/{{ assignment.points_possible }}
                             {% else %}
                                 -
                             {% endif %}
                         </td>
                         <td>
                             <a href="{% url 'assignment:submission_detail' submission.pk %}" class="btn btn-primary">View</a>
-                            {% if submission.grade is None %}
+                            {% if not submission.is_graded %}
                                 <a href="{% url 'assignment:grade' submission.pk %}" class="btn btn-secondary">Grade</a>
                             {% endif %}
                         </td>

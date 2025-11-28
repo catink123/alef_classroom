@@ -44,29 +44,55 @@ def dashboard_view(request):
         ).select_related('student', 'assignment').order_by('-submitted_at')[:10]
         
         for submission in recent_submissions:
+            student_name = submission.student.get_full_name() or submission.student.username
+            if submission.is_graded:
+                description = f"{student_name} received {submission.points_earned}/{submission.assignment.points_possible} on {submission.assignment.title}"
+                timestamp = submission.graded_at
+            else:
+                description = f"{student_name} submitted {submission.assignment.title} {'(late)' if submission.is_late else ''}"
+                timestamp = submission.submitted_at
+            
             activities.append({
                 'type': 'submission',
-                'title': f"Submission: {submission.assignment.title}",
-                'user': submission.student.username,
-                'timestamp': submission.submitted_at,
-                'description': f"Submitted {'late' if submission.is_late else 'on time'}"
+                'title': f"{'Graded' if submission.is_graded else 'Submitted'}: {submission.assignment.title}",
+                'user': student_name,
+                'timestamp': timestamp,
+                'description': description
             })
     else:
-        # Recent assignments for students
+        # Recent assignments and grades for students
         classrooms = ClassroomMember.objects.filter(user=user).values_list('classroom', flat=True)
         
+        # Get recent assignments
         recent_assignments = Assignment.objects.filter(
             classroom__in=classrooms,
             is_published=True
         ).order_by('-created_at')[:5]
         
         for assignment in recent_assignments:
+            teacher_name = assignment.created_by.get_full_name() or assignment.created_by.username
             activities.append({
                 'type': 'assignment',
-                'title': assignment.title,
-                'user': assignment.created_by.username,
+                'title': f"New assignment: {assignment.title}",
+                'user': teacher_name,
                 'timestamp': assignment.created_at,
                 'description': f"New assignment in {assignment.classroom.name}"
+            })
+        
+        # Get recent grades
+        recent_grades = AssignmentSubmission.objects.filter(
+            student=user,
+            is_graded=True
+        ).select_related('assignment').order_by('-graded_at')[:5]
+        
+        for submission in recent_grades:
+            teacher_name = submission.assignment.created_by.get_full_name() or submission.assignment.created_by.username
+            activities.append({
+                'type': 'grade',
+                'title': f"Graded: {submission.assignment.title}",
+                'user': teacher_name,
+                'timestamp': submission.graded_at,
+                'description': f"You received {submission.points_earned}/{submission.assignment.points_possible} on {submission.assignment.title}"
             })
     
     # Sort all activities by timestamp

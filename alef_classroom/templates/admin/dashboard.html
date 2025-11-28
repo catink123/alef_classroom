@@ -170,7 +170,7 @@
                 <div class="activity-list">
                     {% for submission in recent_submissions %}
                     <div class="activity-item">
-                        <div class="activity-title">{{ submission.student.username }}</div>
+                        <div class="activity-title">{{ submission.student.get_full_name|default:submission.student.username }}</div>
                         <div class="activity-meta">
                             <span>{{ submission.assignment.title }}</span>
                             <span>{{ submission.submitted_at|date:"M d, Y" }}</span>

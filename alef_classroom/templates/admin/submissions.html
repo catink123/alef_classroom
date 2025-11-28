@@ -48,7 +48,7 @@
             <tbody>
                 {% for submission in submissions %}
                 <tr>
-                    <td><strong>{{ submission.student.username }}</strong></td>
+                    <td><strong>{{ submission.student.get_full_name|default:submission.student.username }}</strong></td>
                     <td>{{ submission.assignment.title }}</td>
                     <td>{{ submission.assignment.classroom.name }}</td>
                     <td>{{ submission.submitted_at|date:"M d, Y g:i A" }}</td>

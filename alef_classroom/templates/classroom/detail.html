@@ -91,7 +91,7 @@
                                                 {% else %}
                                                 <i class="material-icons">person</i>
                                                 {% endif %}
-                                                {{ announcement.author.username }}
+                                                {{ announcement.author.get_full_name|default:announcement.author.username }}
                                             </span>
                                             <span class="date">
                                                 <i class="material-icons">schedule</i>
@@ -122,7 +122,7 @@
                                                     </div>
                                                     <div class="comment-content">
                                                         <div class="comment-header">
-                                                            <span class="comment-author">{{ comment.author.username }}</span>
+                                                            <span class="comment-author">{{ comment.author.get_full_name|default:comment.author.username }}</span>
                                                             <span class="comment-date">{{ comment.created_at|date:"M d, Y g:i A" }}</span>
                                                         </div>
                                                         <div class="comment-text">{{ comment.content|linebreaks }}</div>
@@ -195,7 +195,7 @@
                                         {% endif %}
                                     </div>
                                     <div class="member-info">
-                                        <a href="{% url 'accounts:user_detail' admin.user.username %}" class="member-name">{{ admin.user.username }}</a>
+                                        <a href="{% url 'accounts:user_detail' admin.user.username %}" class="member-name">{{ admin.user.get_full_name|default:admin.user.username }}</a>
                                         <span class="member-role admin">Admin</span>
                                     </div>
                                 </div>
@@ -218,7 +218,7 @@
                                         {% endif %}
                                     </div>
                                     <div class="member-info">
-                                        <a href="{% url 'accounts:user_detail' teacher.user.username %}" class="member-name">{{ teacher.user.username }}</a>
+                                        <a href="{% url 'accounts:user_detail' teacher.user.username %}" class="member-name">{{ teacher.user.get_full_name|default:teacher.user.username }}</a>
                                         {% if teacher.user == classroom.creator %}
                                             <span class="member-role creator">Creator</span>
                                         {% else %}
@@ -244,7 +244,7 @@
                                         {% endif %}
                                     </div>
                                     <div class="member-info">
-                                        <a href="{% url 'accounts:user_detail' student.user.username %}" class="member-name">{{ student.user.username }}</a>
+                                        <a href="{% url 'accounts:user_detail' student.user.username %}" class="member-name">{{ student.user.get_full_name|default:student.user.username }}</a>
                                         <span class="member-role student">Student</span>
                                     </div>
                                 </div>

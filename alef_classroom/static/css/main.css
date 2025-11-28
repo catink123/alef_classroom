@@ -445,6 +445,96 @@ a:hover {
     text-decoration: none;
 }
 
+/* Override Bootstrap's default link colors in buttons and badges */
+.btn-link {
+    color: #556b2f;
+}
+
+.btn-link:hover {
+    color: #3d4d1f;
+}
+
+/* Badge styling */
+.badge {
+    font-weight: 500;
+}
+
+.badge-primary {
+    background-color: var(--primary) !important;
+    color: var(--text-on-primary) !important;
+}
+
+.badge-secondary {
+    background-color: var(--secondary) !important;
+    color: var(--text-on-secondary) !important;
+}
+
+.badge-info {
+    background-color: #0dcaf0 !important;
+    color: #000 !important;
+}
+
+.badge-success {
+    background-color: #198754 !important;
+    color: #fff !important;
+}
+
+.badge-danger {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+}
+
+.badge-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.badge-light {
+    background-color: #f8f9fa !important;
+    color: #000 !important;
+}
+
+.badge-dark {
+    background-color: #212529 !important;
+    color: #fff !important;
+}
+
+
+
+/* Override Bootstrap info button colors */
+.btn-outline-info {
+    color: var(--primary) !important;
+    border-color: var(--primary) !important;
+}
+
+.btn-outline-info:hover,
+.btn-outline-info:focus {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: var(--text-on-primary) !important;
+}
+
+.btn-info {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: var(--text-on-primary) !important;
+}
+
+.btn-info:hover,
+.btn-info:focus {
+    background-color: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+}
+
+/* Override Bootstrap info badge color */
+.bg-info {
+    background-color: var(--primary) !important;
+}
+
+.badge.bg-info {
+    color: var(--text-on-primary) !important;
+}
+
 .dropdown-item {
     color: var(--on-surface);
     transition: background-color var(--transition-standard), color var(--transition-standard);
